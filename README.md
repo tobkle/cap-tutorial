@@ -1,4 +1,13 @@
-# Deploying this App to SAP Business Technology Platform (SAP BTP)
+# Deploying an App to SAP Business Technology Platform (SAP BTP)
+
+Initialize a new project
+
+```zsh
+nvm use 16
+node -v > .nvmrc
+cds init
+npm i sqlite
+```
 
 # Getting Started
 
@@ -41,20 +50,20 @@ Not logged in. Use 'cf login' or 'cf login --sso' to log in.
 ❯ cf login
 API endpoint: https://api.cf.us10-001.hana.ondemand.com
 
-Email: @wuerth-it.com
+Email: mail@example.com
 Password:
 
 Authenticating...
 OK
 
-Targeted org ae075762trial.
+Targeted org mytrialorg
 
 Targeted space dev.
 
 API endpoint:   https://api.cf.us10-001.hana.ondemand.com
 API version:    3.134.0
-user:           @wuerth-it.com
-org:            ae075762trial
+user:           mail@example.com
+org:            mytrialorg
 space:          dev
 ```
 
@@ -138,13 +147,13 @@ cf apps
 ## Deploying MTAR to SAP BTP Cloud Foundry environment
 
 ```zsh
-Deploying multi-target app archive cpapp2_1.0.0.mtar in org ae075762trial / space dev as tobias.klemmer@wuerth-it.com...
+Deploying multi-target app archive cpapp2_1.0.0.mtar in org mytargetorg / space dev as tobias.klemmermail@example.com...
 
 Uploading 1 files...
   /Users/toby/code/sap/cap/training/cpapp2/cpapp2_1.0.0.mtar
 OK
 Operation ID: af60ef88-ff9c-11ed-a738-eeee0a8a7226
-Deploying in org "ae075762trial" and space "dev"
+Deploying in org "mytargetorg" and space "dev"
 Detected MTA schema version: "3"
 No deployed MTA detected - this is initial deployment of MTA with ID "cpapp2"
 Detected new MTA version: "1.0.0"
@@ -174,7 +183,7 @@ Staging application "cpapp2-db-deployer"...
 Staging application "cpapp2-srv"...
 Application "cpapp2-srv" staged
 Starting application "cpapp2-srv"...
-Application "cpapp2-srv" started and available at "ae075762trial-dev-cpapp2-srv.cfapps.us10-001.hana.ondemand.com"
+Application "cpapp2-srv" started and available at "mytargetorg-dev-cpapp2-srv.cfapps.us10-001.hana.ondemand.com"
 Application "cpapp2-db-deployer" staged
 Executing task "deploy" on application "cpapp2-db-deployer"...
 Skipping deletion of services, because the command line option "--delete-services" is not specified.
@@ -259,13 +268,13 @@ cd ../..
 mbt build -t ./
 cf deploy cpapp2_1.0.0.mtar
 
-Deploying multi-target app archive cpapp2_1.0.0.mtar in org ae075762trial / space dev as tobias.klemmer@wuerth-it.com...
+Deploying multi-target app archive cpapp2_1.0.0.mtar in org mytargetorg / space dev as tobias.klemmermail@example.com...
 
 Uploading 1 files...
   /Users/toby/code/sap/cap/training/cpapp2/cpapp2_1.0.0.mtar
 OK
 Operation ID: 7c3b0169-ffa2-11ed-aa3d-eeee0a869207
-Deploying in org "ae075762trial" and space "dev"
+Deploying in org "mytargetorg" and space "dev"
 Detected MTA schema version: "3"
 Detected deployed MTA with ID "cpapp2" and version "1.0.0"
 Detected new MTA version: "1.0.0"
@@ -309,7 +318,7 @@ Staging application "cpapp2-srv"...
 Application "cpapp2-srv" staged
 Starting application "cpapp2-srv"...
 Application "cpapp2-db-deployer" staged
-Application "cpapp2-srv" started and available at "ae075762trial-dev-cpapp2-srv.cfapps.us10-001.hana.ondemand.com"
+Application "cpapp2-srv" started and available at "mytargetorg-dev-cpapp2-srv.cfapps.us10-001.hana.ondemand.com"
 Executing task "deploy" on application "cpapp2-db-deployer"...
 Skipping deletion of services, because the command line option "--delete-services" is not specified.
 Process finished.
