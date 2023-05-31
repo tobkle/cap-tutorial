@@ -1,0 +1,177 @@
+_schema-version: "3.1"
+ID: cpapp2
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: cpapp2-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: cpapp2-db
+  - name: cpapp2-uaa
+  - name: cpapp2-logs
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+  build-parameters:
+    builder: npm-ci
+- name: cpapp2-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: cpapp2-db
+  - name: cpapp2-logs
+  parameters:
+    buildpack: nodejs_buildpack
+- name: cpapp2-destinations
+  type: com.sap.application.content
+  requires:
+  - name: cpapp2-uaa
+    parameters:
+      service-key:
+        name: cpapp2-uaa-key
+  - name: cpapp2-html5-repo-host
+    parameters:
+      service-key:
+        name: cpapp2-html5-repo-host-key
+  - name: srv-api
+  - name: cpapp2-destination
+    parameters:
+      content-target: true
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Authentication: OAuth2UserTokenExchange
+          Name: cpapp2-app-srv
+          TokenServiceInstanceName: cpapp2-uaa
+          TokenServiceKeyName: cpapp2-uaa-key
+          URL: ~{srv-api/srv-url}
+          sap.cloud.service: cpapp2.service
+        - Name: cpapp2-html5-repo-host
+          ServiceInstanceName: cpapp2-html5-repo-host
+          ServiceKeyName: cpapp2-html5-repo-host-key
+          sap.cloud.service: cpapp2.service
+        - Authentication: OAuth2UserTokenExchange
+          Name: cpapp2-uaa
+          ServiceInstanceName: cpapp2-uaa
+          ServiceKeyName: cpapp2-uaa-key
+          sap.cloud.service: cpapp2.service
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+- name: cpapp2-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: cpapp2-html5-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - nsrisks.zip
+      name: nsrisks
+      target-path: resources/
+    - artifacts:
+      - nsmitigations.zip
+      name: nsmitigations
+      target-path: resources/
+    - artifacts:
+      - nsriskanalysis.zip
+      name: nsriskanalysis
+      target-path: resources/
+- name: nsrisks
+  type: html5
+  path: app/risks
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: nsmitigations
+  type: html5
+  path: app/mitigations
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: nsriskanalysis
+  type: html5
+  path: app/risk-analysis
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: cpapp2-logs
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: application-logs
+    service-plan: lite
+- name: cpapp2-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: cpapp2-uaa
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      role-collections:
+      - description: Manage Risks
+        name: RiskManager-${space}
+        role-template-references:
+        - $XSAPPNAME.RiskManager
+      - description: View Risks
+        name: RiskViewer-${space}
+        role-template-references:
+        - $XSAPPNAME.RiskViewer
+      tenant-mode: dedicated
+      xsappname: cpapp2-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+- name: cpapp2-destination
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+    service: destination
+    service-plan: lite
+- name: cpapp2-html5-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-plan: app-host
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm install --production
+    - npx -p @sap/cds-dk cds build --production
+    - npx rimraf gen/db/src/gen/data

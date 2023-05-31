@@ -1,0 +1,48 @@
+{
+    "name": "cpapp2",
+    "version": "1.0.0",
+    "description": "A simple CAP project.",
+    "repository": "<Add your repository here>",
+    "license": "UNLICENSED",
+    "private": true,
+    "engines": {
+        "node": "^16"
+    },
+    "dependencies": {
+        "@sap/cds": "^6",
+        "@sap/xssec": "^3",
+        "express": "^4",
+        "hdb": "^0.19.0",
+        "passport": "^0",
+        "rimraf": "^5.0.1",
+        "sqlite": "^4.2.1"
+    },
+    "devDependencies": {
+        "@sap/ux-specification": "^1.108.6",
+        "rimraf": "^3.0.2",
+        "sqlite3": "^5"
+    },
+    "scripts": {
+        "start": "cds-serve",
+        "watch-risks": "cds watch --open risks/webapp/index.html?sap-ui-xx-viewCache=false",
+        "watch-mitigations": "cds watch --open mitigations/webapp/index.html?sap-ui-xx-viewCache=false",
+        "undeploy": "cf undeploy cpapp2 --delete-services --delete-service-keys --delete-service-brokers",
+        "build": "rimraf resources mta_archives && mbt build --mtar archive",
+        "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+        "watch-risk-analysis": "cds watch --open risk-analysis/webapp/index.html?sap-ui-xx-viewCache=false"
+    },
+    "sapux": [
+        "app/risks",
+        "app/mitigations",
+        "app/risk-analysis"
+    ],
+    "cds": {
+        "requires": {
+            "[production]": {
+                "db": "hana-cloud",
+                "auth": "xsuaa"
+            },
+            "db": "sql"
+        }
+    }
+}
